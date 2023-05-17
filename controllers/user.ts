@@ -1,34 +1,82 @@
 import { Request, Response } from 'express';
+import { isValidObjectId } from 'mongoose';
+import bcrypt from 'bcrypt';
+import User from '../models/User';
 
 export const getUsers = async (req: Request, res: Response) => {
-	res.json({
-		msg: 'This route returns all users',
-	});
+	try {
+		const users = await User.find().select('-password -__v').lean();
+		return res.status(200).json(users);
+	} catch (error) {
+		console.log(error);
+
+		return res.status(500).json({
+			message: 'Error while getting users, please contact the admin',
+		});
+	}
 };
 
 export const getUser = async (req: Request, res: Response) => {
 	const { id } = req.params;
-	res.json({
-		msg: `This route returns user with id ${id}`,
-	});
+
+	try {
+		const user = await User.findById(id).select('-password -__v').lean();
+		return res.status(200).json(user);
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			message: `Error while getting user with id ${id}, please contact the admin`,
+		});
+	}
 };
 
 export const createUser = async (req: Request, res: Response) => {
-	res.json({
-		msg: `This route creates a user`,
-	});
+	const { fullName, email, password } = req.body;
+	try {
+		const user = await User.create({ email, fullName, password: bcrypt.hashSync(password, 12) });
+
+		return res.status(201).json(user);
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			message: 'Error while creating user, please contact the admin',
+		});
+	}
 };
 
 export const updateUser = async (req: Request, res: Response) => {
 	const { id } = req.params;
-	res.json({
-		msg: `This route updates a user with id ${id}`,
-	});
+	const { password, email, ...rest } = req.body;
+	try {
+		if (password) {
+			rest.password = bcrypt.hashSync(password, 12);
+		}
+		//TODO: Validate if role field wants to be updated and verify if the auth user is ADMIN so only ADMIN users can upgrade user role
+		//TODO: Validate that new role is a valid role
+		const user = await User.findByIdAndUpdate(id, rest, { new: true, runValidators: true })
+			.select('-password -__v')
+			.lean();
+		return res.status(200).json(user);
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			message: 'Error while updating user, please contact the admin',
+		});
+	}
 };
 
 export const deleteUser = async (req: Request, res: Response) => {
 	const { id } = req.params;
-	res.json({
-		msg: `This route deletes a user with id ${id}`,
-	});
+	try {
+		//* Changing the isActive property of the user to false so we can keep the reference of the user in db
+		const user = await User.findByIdAndUpdate(id, { isActive: false });
+		return res.status(200).json({
+			message: `User '${user!.fullName}' deleted`,
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			message: 'Error while deleting user, please contact the admin',
+		});
+	}
 };
