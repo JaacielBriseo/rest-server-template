@@ -1,12 +1,15 @@
 import { Request, Response } from 'express';
-import { isValidObjectId } from 'mongoose';
 import bcrypt from 'bcrypt';
 import User from '../models/User';
 
 export const getUsers = async (req: Request, res: Response) => {
+	const { limit = 5, from = 0 } = req.query;
 	try {
-		const users = await User.find().select('-password -__v').lean();
-		return res.status(200).json(users);
+		const [users, total] = await Promise.all([
+			User.find({ isActive: true }).skip(Number(from)).limit(Number(limit)).select('-password -__v').lean(),
+			User.countDocuments({ isActive: true }),
+		]);
+		return res.status(200).json({ users, total });
 	} catch (error) {
 		console.log(error);
 
