@@ -1,5 +1,4 @@
-import Role from '../models/Role';
-import User from '../models/User';
+import { Role, User } from '../models';
 
 export const emailExists = async (email = '') => {
 	const emailRegistered = await User.findOne({ email });

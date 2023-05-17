@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import User from '../models/User';
+import { User } from '../models';
 
 export const getUsers = async (req: Request, res: Response) => {
 	const { limit = 5, from = 0 } = req.query;
@@ -73,8 +73,8 @@ export const updateUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
 	const { id } = req.params;
+
 	try {
-		//* Changing the isActive property of the user to false so we can keep the reference of the user in db
 		const user = await User.findByIdAndUpdate(id, { isActive: false });
 		return res.status(200).json({
 			message: `User '${user!.fullName}' deleted`,

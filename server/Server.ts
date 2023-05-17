@@ -1,13 +1,14 @@
 import express, { Application } from 'express';
 import cors from 'cors';
 import { dbConnect } from '../db/config';
-import userRoutes from '../routes/user';
+import { authRoutes, userRoutes } from '../routes';
 
 export default class Server {
 	private app: Application;
 	private port: string;
 	private apiPaths = {
 		users: '/api/users',
+		auth: '/api/auth',
 	};
 
 	constructor() {
@@ -32,8 +33,9 @@ export default class Server {
 			console.log(`Server running on port: ${this.port}`);
 		});
 	}
-	
+
 	routes() {
 		this.app.use(this.apiPaths.users, userRoutes);
+		this.app.use(this.apiPaths.auth, authRoutes);
 	}
 }

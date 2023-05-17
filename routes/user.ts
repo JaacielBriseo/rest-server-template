@@ -1,9 +1,8 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
-import { validateFields } from '../middlewares';
-import { emailExists, isValidRole, userExistsById } from '../helpers';
+import { validateFields, validateJWT } from '../middlewares';
+import { emailExists, userExistsById } from '../helpers';
 import { createUser, deleteUser, getUser, getUsers, updateUser } from '../controllers/user';
-
 const router = Router();
 
 router.get('/', getUsers);
@@ -32,6 +31,7 @@ router.post(
 router.patch(
 	'/:id',
 	[
+		validateJWT,
 		check('id').isMongoId(),
 		check('id').custom(userExistsById),
 		//  check('role').custom(isValidRole), //TODO: Find a way to check this just if the user wants to change it
@@ -40,6 +40,10 @@ router.patch(
 	updateUser
 );
 
-router.delete('/:id', [check('id').isMongoId(), check('id').custom(userExistsById), validateFields], deleteUser);
+router.delete(
+	'/:id',
+	[validateJWT, check('id').isMongoId(), check('id').custom(userExistsById), validateFields],
+	deleteUser
+);
 
 export default router;
