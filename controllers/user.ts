@@ -31,9 +31,13 @@ export const getUser = async (req: Request, res: Response) => {
 };
 
 export const createUser = async (req: Request, res: Response) => {
-	const { fullName, email, password } = req.body;
+	const { fullName, email, password } = req.body as { fullName: string; email: string; password: string };
 	try {
-		const user = await User.create({ email, fullName, password: bcrypt.hashSync(password, 12) });
+		const user = await User.create({
+			email,
+			fullName: fullName.toUpperCase(),
+			password: bcrypt.hashSync(password, 12),
+		});
 
 		return res.status(201).json(user);
 	} catch (error) {
@@ -46,13 +50,12 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
 	const { id } = req.params;
-	const { password, email, ...rest } = req.body;
+	const { role, password, email, ...rest } = req.body;
 	try {
 		if (password) {
 			rest.password = bcrypt.hashSync(password, 12);
 		}
-		//TODO: Validate if role field wants to be updated and verify if the auth user is ADMIN so only ADMIN users can upgrade user role
-		//TODO: Validate that new role is a valid role
+		rest.fullName = rest.fullName.toUpperCase();
 		const user = await User.findByIdAndUpdate(id, rest, { new: true, runValidators: true })
 			.select('-password -__v')
 			.lean();

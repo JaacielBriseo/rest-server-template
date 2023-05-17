@@ -14,16 +14,16 @@ router.post(
 	'/',
 	[
 		check('fullName', 'Full name is required').not().isEmpty(),
-		check('password', 'Password is required').not().isEmpty(),
-		check('email', 'Email is required').not().isEmpty(),
 		check('fullName', 'Full name must be at least 5 characters').isLength({ min: 5 }),
 		check('fullName', 'Full name must be max 25 characters').isLength({ max: 25 }),
+		check('email', 'Email is required').not().isEmpty(),
+		check('email', 'Not a valid email').isEmail(),
+		check('email').custom(emailExists),
+		check('password', 'Password is required').not().isEmpty(),
 		check('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
 		check('password', 'Password must contain a lowercase , an uppercase and a number ').matches(
 			/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).+$/
 		),
-		check('email', 'Not a valid email').isEmail(),
-		check('correo').custom(emailExists),
 		validateFields,
 	],
 	createUser
