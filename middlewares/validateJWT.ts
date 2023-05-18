@@ -6,7 +6,7 @@ export const validateJWT = async (req: Request, res: Response, next: NextFunctio
 	const token = req.headers.authorization;
 	if (!token) {
 		return res.status(401).json({
-			message: 'There is no token on request',
+			msg: 'There is no token on request',
 		});
 	}
 
@@ -20,13 +20,13 @@ export const validateJWT = async (req: Request, res: Response, next: NextFunctio
 
 		if (!user) {
 			return res.status(404).json({
-				message: 'User not found',
+				msg: 'User not found',
 			});
 		}
 
 		if (!user?.isActive) {
 			return res.status(401).json({
-				message: 'Not valid token',
+				msg: 'Not valid token',
 			});
 		}
 
@@ -35,7 +35,7 @@ export const validateJWT = async (req: Request, res: Response, next: NextFunctio
 	} catch (error) {
 		console.log(error);
 		return res.status(401).json({
-			message: 'Unvalid token',
+			msg: 'Unvalid token',
 		});
 	}
 };

@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { check } from 'express-validator';
-import { validateFields, validateJWT } from '../middlewares';
-import { emailExists, userExistsById } from '../helpers';
-import { createUser, deleteUser, getUser, getUsers, updateUser } from '../controllers/user';
+import { emailExists, isValidRole, userExistsById } from '../helpers';
+import { isAdminOrOwner, isAdminRole, validateFields, validateJWT } from '../middlewares';
+import { createUser, deleteUser, getUser, getUsers, updateUser, upgradeUserPermissions } from '../controllers/user';
+
 const router = Router();
 
 router.get('/', getUsers);
@@ -30,20 +31,27 @@ router.post(
 
 router.patch(
 	'/:id',
-	[
-		validateJWT,
-		check('id').isMongoId(),
-		check('id').custom(userExistsById),
-		//  check('role').custom(isValidRole), //TODO: Find a way to check this just if the user wants to change it
-		validateFields,
-	],
+	[validateJWT, check('id').isMongoId(), check('id').custom(userExistsById), isAdminOrOwner, validateFields],
 	updateUser
 );
 
 router.delete(
 	'/:id',
-	[validateJWT, check('id').isMongoId(), check('id').custom(userExistsById), validateFields],
+	[validateJWT, check('id').isMongoId(), check('id').custom(userExistsById), isAdminOrOwner, validateFields],
 	deleteUser
+);
+
+router.put(
+	'/:id',
+	[
+		validateJWT,
+		isAdminRole,
+		check('id').isMongoId(),
+		check('id').custom(userExistsById),
+		check('newRole').custom(isValidRole),
+		validateFields,
+	],
+	upgradeUserPermissions
 );
 
 export default router;

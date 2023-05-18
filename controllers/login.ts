@@ -10,15 +10,15 @@ export const login = async (req: Request, res: Response) => {
 		const user = await User.findOne({ email });
 		if (!user) {
 			return res.status(404).json({
-				message: `User with email '${email}' not found`,
+				msg: `User with email '${email}' not found`,
 			});
 		}
 		if (!user.isActive) {
-			return res.status(400).json({ message: 'User seems to be inactive, contact the admin' });
+			return res.status(400).json({ msg: 'User seems to be inactive, contact the admin' });
 		}
 		if (!bcrypt.compareSync(password, user.password!)) {
 			return res.status(400).json({
-				message: 'Email and/or password are incorrect',
+				msg: 'Email and/or password are incorrect',
 			});
 		}
 
@@ -27,7 +27,7 @@ export const login = async (req: Request, res: Response) => {
 	} catch (error) {
 		console.log(error);
 		return res.status(500).json({
-			message: 'Error login user, please contact admin',
+			msg: 'Error login user, please contact admin',
 		});
 	}
 };

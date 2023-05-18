@@ -14,7 +14,7 @@ export const getUsers = async (req: Request, res: Response) => {
 		console.log(error);
 
 		return res.status(500).json({
-			message: 'Error while getting users, please contact the admin',
+			msg: 'Error while getting users, please contact the admin',
 		});
 	}
 };
@@ -28,7 +28,7 @@ export const getUser = async (req: Request, res: Response) => {
 	} catch (error) {
 		console.log(error);
 		return res.status(500).json({
-			message: `Error while getting user with id ${id}, please contact the admin`,
+			msg: `Error while getting user with id ${id}, please contact the admin`,
 		});
 	}
 };
@@ -46,7 +46,7 @@ export const createUser = async (req: Request, res: Response) => {
 	} catch (error) {
 		console.log(error);
 		return res.status(500).json({
-			message: 'Error while creating user, please contact the admin',
+			msg: 'Error while creating user, please contact the admin',
 		});
 	}
 };
@@ -66,23 +66,36 @@ export const updateUser = async (req: Request, res: Response) => {
 	} catch (error) {
 		console.log(error);
 		return res.status(500).json({
-			message: 'Error while updating user, please contact the admin',
+			msg: 'Error while updating user, please contact the admin',
 		});
 	}
 };
 
 export const deleteUser = async (req: Request, res: Response) => {
 	const { id } = req.params;
-
 	try {
 		const user = await User.findByIdAndUpdate(id, { isActive: false });
 		return res.status(200).json({
-			message: `User '${user!.fullName}' deleted`,
+			msg: `User '${user!.fullName}' deleted`,
 		});
 	} catch (error) {
 		console.log(error);
 		return res.status(500).json({
-			message: 'Error while deleting user, please contact the admin',
+			msg: 'Error while deleting user, please contact the admin',
+		});
+	}
+};
+
+export const upgradeUserPermissions = async (req: Request, res: Response) => {
+	const { id } = req.params;
+	const { newRole } = req.body;
+	try {
+		const user = await User.findByIdAndUpdate(id, { role: newRole }, { new: true, runValidators: true });
+		return res.status(200).json(user);
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			msg: 'Error upgrading user permissions, please contact the admin',
 		});
 	}
 };
